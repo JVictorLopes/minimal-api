@@ -5,23 +5,33 @@ namespace MinimalApi.Infraestrutura.Db;
 
 public class DbContexto : DbContext
 {
-    private readonly IConfiguration _configuraçãoAppSettings;
-    public DbContexto(IConfiguration configuraçãoAppSettings)
+    private readonly IConfiguration _configuracaoAppSettings;
+    public DbContexto(IConfiguration configuracaoAppSettings)
     {
-        _configuraçãoAppSettings = configuraçãoAppSettings;
+        _configuracaoAppSettings = configuracaoAppSettings;
     }
     public DbSet<Administrador> Administradores { get; set; } = default!;
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Administrador>().HasData(
+            new Administrador
+            {
+                Email = "Administrador@teste.com",
+                Senha = "123456",
+                Perfil = "Adm"
+            }
+        );
+    }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
         {
-                var stringConexao = _configuraçãoAppSettings.GetConnectionString("mysql")?.ToString();
-                if (!string.IsNullOrEmpty(stringConexao))
-                {
-                    optionsBuilder.UseMySql(
-                    "string de conexão",
-                    ServerVersion.AutoDetect("string de conexao")
+            var stringConexao = _configuracaoAppSettings.GetConnectionString("mysql")?.ToString();
+            if (!string.IsNullOrEmpty(stringConexao))
+            {
+                optionsBuilder.UseMySql("string de conexão", ServerVersion.AutoDetect("string de conexao")
                 );
             }
         }
